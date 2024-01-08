@@ -65,5 +65,53 @@ recordRoutes.route("/getUsers").get(async function(req, res) {
         res.status(500).json({ message: 'Błąd podczas pobierania użytkowników' });
     }
 });
+recordRoutes.route("/getPassword/:login").get(async function(req, res) {
+    const { login } = req.params;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const usersCollection = db_connect.collection('users');
+        const user = await usersCollection.findOne({ login: login });
+        if (user) {
+            res.status(200).json({ password: user.password });
+        } else {
+            res.status(404).json({ message: 'Użytkownik nie został znaleziony' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas pobierania hasła' });
+    }
+});
+recordRoutes.route("/editPassword").put(async function(req, res) {
+    const { login, password } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const usersCollection = db_connect.collection('users');
+        const user = await usersCollection.findOne({ login: login });
+        if (user) {
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            const result = await usersCollection.updateOne({ login: login }, { $set: { password: hashedPassword } });
+            res.status(200).json({ message: 'Hasło zmienione' });
+        } else {
+            res.status(404).json({ message: 'Użytkownik nie został znaleziony' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas zmiany hasła' });
+    }
+});
+recordRoutes.route("/editLogin").put(async function(req, res) {
+    const { login, newLogin } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const usersCollection = db_connect.collection('users');
+        const user = await usersCollection.findOne({ login: login });
+        if (user) {
+            const result = await usersCollection.updateOne({ login: login }, { $set: { login: newLogin } });
+            res.status(200).json({ message: 'Login zmieniony' });
+        } else {
+            res.status(404).json({ message: 'Użytkownik nie został znaleziony' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas zmiany loginu' });
+    }
+});
 
 module.exports = recordRoutes;

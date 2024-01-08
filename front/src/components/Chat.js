@@ -14,7 +14,7 @@ export default function Home() {
             {login ? (<div>
                 <Navbar prop={login}/>
                 <div className='flex item-center justify-center'>
-                    SIEMA
+                    Tu jest wielki chat
                 </div>
                 </div> 
                 ) : (
