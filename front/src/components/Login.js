@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
+import Cookies from "js-cookie";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -38,6 +39,7 @@ export default function Login() {
             })
             .then((res) => {
                 if (res.status === 200) {
+                    Cookies.set("login", values.login);
                     alert("Zalogowano pomyślnie");
                     navigate("/home");
                 } else {
