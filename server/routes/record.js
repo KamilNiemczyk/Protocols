@@ -113,5 +113,41 @@ recordRoutes.route("/editLogin").put(async function(req, res) {
         res.status(500).json({ message: 'Błąd podczas zmiany loginu' });
     }
 });
-
+recordRoutes.route("/addChat").post(async function(req, res) {
+    const { chat } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const chatsCollection = db_connect.collection('chats');
+        const existingChat = await chatsCollection.findOne({ chat: chat });
+        if (existingChat) {
+            return res.status(500).json({ message: 'Jest już taki czat' });
+        }else{
+            const result = await chatsCollection.insertOne({ chat: chat });
+            res.status(201).json({ message: 'Czat dodany'});
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas dodawania czatu' });
+    }
+}
+);
+recordRoutes.route("/getChats").get(async function(req, res) {
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const chatsCollection = db_connect.collection('chats');
+        const allChats = await chatsCollection.find({}).toArray();
+        res.status(200).json(allChats.map(chat => chat.chat));
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas pobierania czatów' });
+    }
+});
+recordRoutes.route("/deleteAllChats").delete(async function(req, res) {
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const chatsCollection = db_connect.collection('chats');
+        const result = await chatsCollection.deleteMany({});
+        res.status(200).json({ message: 'Wszystkie czaty usuniete'});
+    } catch (error) {
+        res.status(500).json({ message: 'Nie udało sie usunąć wszystkich czatów'});
+    }
+});
 module.exports = recordRoutes;
