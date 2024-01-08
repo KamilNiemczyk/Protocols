@@ -1,24 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';  
-import Navbar from './Navbar';
-export default function Home() {
-    const [login, setLogin] = useState(Cookies.get('login'));
+import React from 'react';
+import { useParams } from 'react-router-dom';
 
-    useEffect(() => {
-      const storedLogin = Cookies.get('login');
-      setLogin(storedLogin);
-    }, [login]); 
+const Chat = () => {
+  const { chatid } = useParams();
 
-    return (
-        <div className='bg-gray-300 min-h-screen'>
-            {login ? (<div>
-                <Navbar prop={login}/>
-                <div className='flex item-center justify-center'>
-                    Tu jest wielki chat
-                </div>
-                </div> 
-                ) : (
-                <div className='flex items-center justify-center h-full' ><h1 className="text-4xl font-bold">Nie jesteś zalogowany</h1></div>)}
-        </div>
-    )
-}
+  return (
+    <div>
+      <h1>Taka jest nazwa tego chatu: {chatid}</h1>
+    </div>
+  );
+};
+
+export default Chat;
