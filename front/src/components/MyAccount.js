@@ -6,6 +6,11 @@ import { useFormik } from "formik";
 export default function Home() {
     const [login, setLogin] = useState(Cookies.get('login'));
     const [password, setPassword] = useState("");
+    const [admin, setAdmin] = useState(Cookies.get('admin'));
+    useEffect(() => {
+        const storedAdmin = Cookies.get('admin');
+        setAdmin(storedAdmin);
+    }, [admin]);
 
     useEffect(() => {
         const storedLogin = Cookies.get('login');
@@ -110,6 +115,15 @@ export default function Home() {
     const hidePassword = () => {
         setPassword("");
     }
+    const changeRole = () => {
+        if (admin === "true") {
+            Cookies.set("admin", "false");
+            setAdmin("false");
+        } else {
+            Cookies.set("admin", "true");
+            setAdmin("true");
+        }
+    }
 
 
 
@@ -118,6 +132,9 @@ export default function Home() {
             {login ? (
             <div className='h-screen'>
                 <Navbar  prop={login} />
+                {admin === "true" ? (<button onClick={changeRole} className='flex justify-center items-center bg-gray-700 m-auto border rounded-full text-white py-4 px-8 my-7'>Kliknij by zabrac sobie prawa adminstratora</button>) : 
+                (<button onClick={changeRole} className='flex justify-center items-center bg-gray-700 m-auto border rounded-full text-white py-4 px-8 my-7'>Kliknij by uzyskać prawa administratora</button>)
+                }
                 <div className='flex item-center justify-center m-[2%]'>
                     <div className='bg-gray-700 flex-grow border rounded-lg py-20 mb-10 px-20 h-full space-y-5'>
                         <div className='justify-center flex items-center space-x-5'>
