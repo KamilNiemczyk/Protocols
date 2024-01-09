@@ -5,6 +5,18 @@ const ObjectId = require("mongodb").ObjectId;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+const fs = require('fs');
+const util = require('util');
+
+const log_file = fs.createWriteStream(__dirname + "/debug.log", { flags: "w" });
+const log_stdout = process.stdout;
+
+console.log = function (d) {
+    log_file.write(util.format(d) + "\n");
+    log_stdout.write(util.format(d) + "\n");
+};
+
+console.log("Server started");
 recordRoutes.route("/register").post(async function(req, res) {
     const newUser = req.body;
     try {
@@ -18,8 +30,10 @@ recordRoutes.route("/register").post(async function(req, res) {
         newUser.password = hashedPassword;
         const result = await usersCollection.insertOne(newUser);
         res.status(201).json({ message: 'Użytkownik dodany'});
+        console.log("Dodalem uzytkownika");
     } catch (error) {
         res.status(500).json({ message: 'Błąd podczas dodawania użytkownika' });
+        console.log("Nie dodalem uzytkownika");
     }
 });
 
@@ -50,6 +64,7 @@ recordRoutes.route("/usunWszystko").delete(async function(req, res) {
         const usersCollection = db_connect.collection('users');
         const result = await usersCollection.deleteMany({});
         res.status(200).json({ message: 'Wszystkie osoby usuniete'});
+        console.log("Usunalem wszystkich");
     } catch (error) {
         res.status(500).json({ message: 'Nie udało sie usunąć wszystkich osób'});
     }
@@ -61,8 +76,10 @@ recordRoutes.route("/getUsers").get(async function(req, res) {
         const usersCollection = db_connect.collection('users');
         const allUsers = await usersCollection.find({}).toArray();
         res.status(200).json(allUsers);
+        console.log("Pobralem uzytkownikow")
     } catch (error) {
         res.status(500).json({ message: 'Błąd podczas pobierania użytkowników' });
+        console.log("Nie pobralo uzytkownikow");
     }
 });
 recordRoutes.route("/getPassword/:login").get(async function(req, res) {
@@ -80,6 +97,18 @@ recordRoutes.route("/getPassword/:login").get(async function(req, res) {
         res.status(500).json({ message: 'Błąd podczas pobierania hasła' });
     }
 });
+recordRoutes.route("/getChats/:chatWzorzec").get(async function(req, res) {
+    const { chatWzorzec } = req.params;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const chatsCollection = db_connect.collection('chats');
+        const allChats = await chatsCollection.find({ chat: { $regex: chatWzorzec, $options: 'i'} }).toArray();
+        res.status(200).json(allChats.map(chat => chat.chat));
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas pobierania czatów' });
+    }
+});
+
 recordRoutes.route("/editPassword").put(async function(req, res) {
     const { login, password } = req.body;
     try {
@@ -106,6 +135,7 @@ recordRoutes.route("/editLogin").put(async function(req, res) {
         if (user) {
             const result = await usersCollection.updateOne({ login: login }, { $set: { login: newLogin } });
             res.status(200).json({ message: 'Login zmieniony' });
+            console.log("Zmienilem login");
         } else {
             res.status(404).json({ message: 'Użytkownik nie został znaleziony' });
         }
@@ -124,6 +154,7 @@ recordRoutes.route("/addChat").post(async function(req, res) {
         }else{
             const result = await chatsCollection.insertOne({ chat: chat });
             res.status(201).json({ message: 'Czat dodany'});
+            console.log("Dodalem czat");
         }
     } catch (error) {
         res.status(500).json({ message: 'Błąd podczas dodawania czatu' });
@@ -136,6 +167,7 @@ recordRoutes.route("/getChats").get(async function(req, res) {
         const chatsCollection = db_connect.collection('chats');
         const allChats = await chatsCollection.find({}).toArray();
         res.status(200).json(allChats.map(chat => chat.chat));
+        console.log("Pobralem czaty")
     } catch (error) {
         res.status(500).json({ message: 'Błąd podczas pobierania czatów' });
     }
@@ -146,6 +178,7 @@ recordRoutes.route("/deleteAllChats").delete(async function(req, res) {
         const chatsCollection = db_connect.collection('chats');
         const result = await chatsCollection.deleteMany({});
         res.status(200).json({ message: 'Wszystkie czaty usuniete'});
+        console.log("Usunalem wszystkie czaty");
     } catch (error) {
         res.status(500).json({ message: 'Nie udało sie usunąć wszystkich czatów'});
     }
