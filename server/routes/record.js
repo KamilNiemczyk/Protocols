@@ -183,4 +183,114 @@ recordRoutes.route("/deleteAllChats").delete(async function(req, res) {
         res.status(500).json({ message: 'Nie udało sie usunąć wszystkich czatów'});
     }
 });
+recordRoutes.route("/addOgloszenie").post(async function(req, res) {
+    const { tytul, tresc, login } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const ogloszeniaCollection = db_connect.collection('ogloszenia');
+        const result = await ogloszeniaCollection.insertOne({ tytul: tytul, tresc: tresc, login: login, komentarze: [] });
+        res.status(201).json({ message: 'Ogłoszenie dodane'});
+        console.log("Dodalem ogloszenie");
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas dodawania ogłoszenia' });
+    }
+}
+);
+recordRoutes.route("/getOgloszenia").get(async function(req, res) {
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const ogloszeniaCollection = db_connect.collection('ogloszenia');
+        const allOgloszenia = await ogloszeniaCollection.find({}).toArray();
+        res.status(200).json(allOgloszenia);
+        console.log("Pobralem ogloszenia")
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas pobierania ogłoszeń' });
+    }
+});
+recordRoutes.route("/addKomentarz").put(async function(req, res) {
+    const { id, komentarz, login } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const ogloszeniaCollection = db_connect.collection('ogloszenia');
+        const result = await ogloszeniaCollection.updateOne({ _id: ObjectId(id) }, { $push: { komentarze: { komentarz: komentarz, login: login } } });
+        res.status(200).json({ message: 'Komentarz dodany'});
+        console.log("Dodalem komentarz");
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas dodawania komentarza' });
+    }
+}
+);
+recordRoutes.route("/deleteAllOgloszenia").delete(async function(req, res) {
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const ogloszeniaCollection = db_connect.collection('ogloszenia');
+        const result = await ogloszeniaCollection.deleteMany({});
+        res.status(200).json({ message: 'Wszystkie ogloszenia usuniete'});
+        console.log("Usunalem wszystkie ogloszenia");
+    } catch (error) {
+        res.status(500).json({ message: 'Nie udało sie usunąć wszystkich ogloszeń'});
+    }
+});
+recordRoutes.route("/deleteOgloszenie").delete(async function(req, res) {
+    const { id } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const ogloszeniaCollection = db_connect.collection('ogloszenia');
+        const result = await ogloszeniaCollection.deleteOne({ _id: ObjectId(id) });
+        res.status(200).json({ message: 'Ogloszenie usuniete'});
+        console.log("Usunalem ogloszenie");
+    } catch (error) {
+        res.status(500).json({ message: 'Nie udało sie usunąć ogloszenia'});
+    }
+});
+recordRoutes.route("/editOgloszenieTitle").put(async function(req, res) {
+    const { id, tytul } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const ogloszeniaCollection = db_connect.collection('ogloszenia');
+        const result = await ogloszeniaCollection.updateOne({ _id: ObjectId(id) }, { $set: { tytul: tytul } });
+        res.status(200).json({ message: 'Tytul ogloszenia zmieniony'});
+        console.log("Zmienilem tytul ogloszenia");
+    } catch (error) {
+        res.status(500).json({ message: 'Nie udało sie zmienić tytulu ogloszenia'});
+    }
+});
+
+recordRoutes.route("/addNote").post(async function(req, res) {
+    const { note, login } = req.body;
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const notesCollection = db_connect.collection('notes');
+        const result = await notesCollection.insertOne({ note: note, login: login });
+        res.status(201).json({ message: 'Notatka dodana'});
+        console.log("Dodalem notatke");
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas dodawania notatki' });
+    }
+}
+);
+
+recordRoutes.route("/getNotes").get(async function(req, res) {
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const notesCollection = db_connect.collection('notes');
+        const allNotes = await notesCollection.find({}).toArray();
+        res.status(200).json(allNotes);
+        console.log("Pobralem notatki")
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd podczas pobierania notatek' });
+    }
+});
+recordRoutes.route("/deleteAllNotes").delete(async function(req, res) {
+    try {
+        let db_connect = dbo.getDb("pswbaza");
+        const notesCollection = db_connect.collection('notes');
+        const result = await notesCollection.deleteMany({});
+        res.status(200).json({ message: 'Wszystkie notatki usuniete'});
+        console.log("Usunalem wszystkie notatki");
+    } catch (error) {
+        res.status(500).json({ message: 'Nie udało sie usunąć wszystkich notatek'});
+    }
+});
+
 module.exports = recordRoutes;
