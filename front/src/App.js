@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import MyAccount from './components/MyAccount.js';
 import ChatGrid from './components/ChatGrid.js';
 import Chat from './components/Chat.js';
+import Ogloszenia from './components/Ogloszenia.js';
 function App() {
   const [login, setLogin] = useState(Cookies.get('login'));
 
@@ -24,6 +25,7 @@ function App() {
         <Route path="/register" element={login ? <Navigate to = "/home"/> : <Register />} />
         <Route path="/home" element={<Home />} />
         <Route path="/myaccount" element={<MyAccount />} />
+        <Route path="/ogloszenia" element={< Ogloszenia />} />
         <Route path="/chat" element={<ChatGrid />} />
         <Route path="/chat/:chatid" element={<Chat />} />
       </Routes>
